@@ -15,7 +15,7 @@
 ----- -->
 
 <div>
-    <img src="./terminal.gif" alt="About Me"/>
+    <img src="./assets/terminal.gif" alt="About Me"/>
 </div>
 
 ### My mission
