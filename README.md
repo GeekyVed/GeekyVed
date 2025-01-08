@@ -55,7 +55,7 @@ Check out my latest post 👇<br>
     <a href="https://www.linkedin.com/in/geekyved/">
         <img src="https://github.com/user-attachments/assets/880aaea6-79b9-4058-b9b4-342391ca04ea" alt="LinkedIn" width="35" height="35"/>
     </a>
-    <a href="https://dev.to/geekyved">
+    <a href="https://hashnode.com/@geekyved">
         <img src="https://github.com/user-attachments/assets/172bc424-569a-4522-a787-97f4cd5a685d" alt="HashNode" width="37" height="37"/>
     </a>
     <a href="https://medium.com/@geekyved">
