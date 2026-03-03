@@ -1,10 +1,8 @@
 <img width=100% src="https://capsule-render.vercel.app/api?type=waving&color=D9BED1&height=120&section=header" alt="header"/> 
 
-<!-- <a href="https://git.io/typing-svg">
-    <img src="https://readme-typing-svg.herokuapp.com?font=Montserrat&weight=500&size=25&duration=4500&pause=500&color=D9BED1&width=435&lines=Hello%2C+it's+Vedant+Singh;Software+Developer" alt="Software Developer"/>
-</a> -->
-
-<!-- -----
+<a href="https://git.io/typing-svg">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Montserrat&weight=500&size=25&duration=4500&pause=500&color=D9BED1&width=435&lines=Hello%2C+it's+Vedant;Software+Developer" alt="Software Developer"/>
+</a> 
 
 <p align="center">
  
@@ -12,21 +10,17 @@
 
 </p>
 
------ -->
 
-<div>
+
+<!-- <div>
     <img src="./assets/terminal.gif" alt="About Me"/>
-</div>
+</div> -->
 
 ### My mission
 I am Vedant Singh Chauhan, a passionate problem-solver who thrives on creating innovative solutions that seamlessly blend technology and user experience. I love working on impactful projects that push boundaries, solve real-world challenges, and inspire growth. Driven by curiosity and a relentless pursuit of excellence, I strive to craft meaningful, efficient, and transformative technology solutions.
 
 ### Main skills
 [![My Skills](https://skillicons.dev/icons?i=flutter,dart,github,git,mongodb,mysql,firebase,nodejs,express,react,html,css,js,bootstrap,redux,tailwind,cpp,java,typescript,postman,aws,python,graphql)](https://skillicons.dev)
-
-
-### Studying  
-[![Learning](https://skillicons.dev/icons?i=docker,kubernetes,jenkins,ansible,terraform,aws,azure)](https://skillicons.dev)
 
 ### Publications
 <div>
@@ -55,6 +49,9 @@ Check out my latest post 👇<br>
     <a href="https://www.linkedin.com/in/geekyved/">
         <img src="https://github.com/user-attachments/assets/880aaea6-79b9-4058-b9b4-342391ca04ea" alt="LinkedIn" width="35" height="35"/>
     </a>
+    <a href="https://www.x.com/in/xgeekyved/">
+        <img src="https://github.com/user-attachments/assets/880aaea6-79b9-4058-b9b4-342391ca04ea" alt="X" width="35" height="35"/>
+    </a>
     <a href="https://hashnode.com/@geekyved">
         <img src="https://github.com/user-attachments/assets/172bc424-569a-4522-a787-97f4cd5a685d" alt="HashNode" width="37" height="37"/>
     </a>
@@ -63,5 +60,5 @@ Check out my latest post 👇<br>
     </a>
 </div>
 
-<img width=100% src="https://capsule-render.vercel.app/api?type=waving&color=D9BED1&height=120&section=footer" alt="footer"/>
+<img width=100% src="https://capsule-render.vercel.app/api?type=waving&color=D9BED1&height=100&section=footer" alt="footer"/>
 
