@@ -14,30 +14,29 @@ def login_to_x(page, username, email, password):
 
     # Step 1: Enter username/email
     print("Entering username ...")
-    username_input = page.wait_for_selector('input[autocomplete="username"]', timeout=15000)
-    username_input.fill(username)
-    # X's React form often ignores the Enter key, explicitly click Next
+    # Wait for the input field to be ready and fill it
+    username_locator = page.locator('input[autocomplete="username"]')
+    username_locator.wait_for(state="visible", timeout=15000)
+    username_locator.fill(username)
+    
+    # Wait a moment for any React state updates, then explicitly click Next
+    # Using 'button' exact role is much safer than general text search
     next_btn = page.locator('button:has-text("Next")')
-    if next_btn.count() > 0:
-        next_btn.first.click()
-    else:
-        page.keyboard.press("Enter")
+    next_btn.wait_for(state="visible", timeout=5000)
+    next_btn.click(force=True)
 
     # Step 2: X might ask for email verification or go straight to password
     print("Waiting for next step ...")
     try:
         # Check if X asks for email/phone verification (suspicious login check)
-        verify_input = page.wait_for_selector(
-            'input[data-testid="ocfEnterTextTextInput"]', timeout=5000
-        )
-        if verify_input:
-            print("Email/phone verification requested, entering email ...")
-            verify_input.fill(email)
-            verify_next = page.locator('button:has-text("Next")')
-            if verify_next.count() > 0:
-                verify_next.first.click()
-            else:
-                page.keyboard.press("Enter")
+        verify_locator = page.locator('input[data-testid="ocfEnterTextTextInput"]')
+        verify_locator.wait_for(state="visible", timeout=5000)
+        print("Email/phone verification requested, entering email ...")
+        verify_locator.fill(email)
+        
+        verify_next = page.locator('button:has-text("Next")')
+        verify_next.wait_for(state="visible", timeout=5000)
+        verify_next.click(force=True)
     except Exception:
         # No verification step — go straight to password
         print("No email verification requested.")
@@ -46,15 +45,13 @@ def login_to_x(page, username, email, password):
     # Step 3: Enter password
     print("Entering password ...")
     try:
-        password_input = page.wait_for_selector(
-            'input[name="password"], input[type="password"]', timeout=15000
-        )
-        password_input.fill(password)
+        password_locator = page.locator('input[name="password"], input[type="password"]')
+        password_locator.wait_for(state="visible", timeout=15000)
+        password_locator.fill(password)
+        
         login_btn = page.locator('button:has-text("Log in")')
-        if login_btn.count() > 0:
-            login_btn.first.click()
-        else:
-            page.keyboard.press("Enter")
+        login_btn.wait_for(state="visible", timeout=5000)
+        login_btn.click(force=True)
     except Exception as e:
         page.screenshot(path="debug_screenshot.png")
         print(f"Failed to find password field. Saved debug_screenshot.png. Error: {e}")
