@@ -27,7 +27,15 @@ jobs:
           
       - name: Run Scraper Script
         run: python scripts/update_tweet.py
-        
+
+      - name: Upload debug screenshot (if scraping failed)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-screenshot
+          path: debug_screenshot.png
+          if-no-files-found: ignore
+
       - name: Commit and push if changed
         run: |
           git config --global user.name "github-actions[bot]"

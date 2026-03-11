@@ -1,5 +1,4 @@
 import sys
-import re
 from playwright.sync_api import sync_playwright
 
 
@@ -14,17 +13,35 @@ def fetch_latest_tweet():
         context = browser.new_context(
             user_agent=(
                 "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            )
+                "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+            ),
+            viewport={"width": 1280, "height": 900},
+            locale="en-US",
         )
         page = context.new_page()
 
         print(f"Navigating to {PROFILE_URL} ...")
-        page.goto(PROFILE_URL, wait_until="networkidle", timeout=60000)
+        try:
+            # Use domcontentloaded — networkidle never fires on X.com
+            page.goto(PROFILE_URL, wait_until="domcontentloaded", timeout=30000)
+        except Exception as e:
+            print(f"Navigation error: {e}")
+            page.screenshot(path="debug_screenshot.png")
+            print("Saved debug_screenshot.png")
+            browser.close()
+            return None, None
 
-        # Wait for tweet articles to load
+        # Wait for tweet articles to appear (X loads them via JS)
         print("Waiting for tweets to load ...")
-        page.wait_for_selector('article[data-testid="tweet"]', timeout=30000)
+        try:
+            page.wait_for_selector('article[data-testid="tweet"]', timeout=30000)
+        except Exception:
+            # Take a screenshot so we can debug what the page looks like
+            page.screenshot(path="debug_screenshot.png")
+            print("Tweets did not load. Saved debug_screenshot.png for inspection.")
+            print(f"Page title: {page.title()}")
+            browser.close()
+            return None, None
 
         # Get all tweet articles
         articles = page.query_selector_all('article[data-testid="tweet"]')
@@ -41,13 +58,15 @@ def fetch_latest_tweet():
         text_el = first_article.query_selector('[data-testid="tweetText"]')
         tweet_text = text_el.inner_text().strip() if text_el else ""
 
-        # Get the tweet link — look for the timestamp link which contains the status URL
-        time_link = first_article.query_selector('a[href*="/status/"] time')
+        # Get the tweet link — look for the timestamp link which contains /status/
         tweet_link = ""
+        time_link = first_article.query_selector('a[href*="/status/"] time')
         if time_link:
-            parent_a = time_link.evaluate('el => el.parentElement.getAttribute("href")')
-            if parent_a:
-                tweet_link = f"https://x.com{parent_a}"
+            href = time_link.evaluate(
+                'el => el.parentElement.getAttribute("href")'
+            )
+            if href:
+                tweet_link = f"https://x.com{href}"
 
         browser.close()
         return tweet_text, tweet_link
