@@ -21,7 +21,8 @@ def login_to_x(page, username, email, password):
     # Step 2: X might ask for email verification or go straight to password
     print("Waiting for next step ...")
     try:
-        # Check if X asks for email/phone verification
+        # Check if X asks for email/phone verification (suspicious login check)
+        # The selector is usually a text input that asks for email/phone
         verify_input = page.wait_for_selector(
             'input[data-testid="ocfEnterTextTextInput"]', timeout=5000
         )
@@ -31,15 +32,21 @@ def login_to_x(page, username, email, password):
             page.keyboard.press("Enter")
     except Exception:
         # No verification step — go straight to password
+        print("No email verification requested.")
         pass
 
     # Step 3: Enter password
     print("Entering password ...")
-    password_input = page.wait_for_selector(
-        'input[name="password"], input[type="password"]', timeout=10000
-    )
-    password_input.fill(password)
-    page.keyboard.press("Enter")
+    try:
+        password_input = page.wait_for_selector(
+            'input[name="password"], input[type="password"]', timeout=15000
+        )
+        password_input.fill(password)
+        page.keyboard.press("Enter")
+    except Exception as e:
+        page.screenshot(path="debug_screenshot.png")
+        print(f"Failed to find password field. Saved debug_screenshot.png. Error: {e}")
+        raise
 
     # Wait for login to complete — look for the home timeline or profile elements
     print("Waiting for login to complete ...")
@@ -49,9 +56,9 @@ def login_to_x(page, username, email, password):
             timeout=20000,
         )
         print("Login successful!")
-    except Exception:
+    except Exception as e:
         page.screenshot(path="debug_screenshot.png")
-        print("Login may have failed. Saved debug_screenshot.png")
+        print(f"Login may have failed. Saved debug_screenshot.png. Error: {e}")
         raise
 
 
@@ -165,7 +172,7 @@ def main():
 
     if not tweet_text:
         print("Could not fetch latest tweet. Exiting gracefully.")
-        sys.exit(0)
+        sys.exit(1) # We WANT it to fail if it hits an error so you know it broke
 
     print(f"Latest tweet: {tweet_text}")
     print(f"Link: {tweet_link}")
