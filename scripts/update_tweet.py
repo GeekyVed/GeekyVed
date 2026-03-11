@@ -1,3 +1,4 @@
+import os
 import sys
 from playwright.sync_api import sync_playwright
 
@@ -6,70 +7,91 @@ TARGET_USERNAME = "xgeekyved"
 PROFILE_URL = f"https://x.com/{TARGET_USERNAME}"
 
 
-def fetch_latest_tweet():
-    """Use a headless browser to visit the public X profile and scrape the latest tweet."""
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-            ),
-            viewport={"width": 1280, "height": 900},
-            locale="en-US",
+def login_to_x(page, username, email, password):
+    """Log into X.com using the login flow."""
+    print("Navigating to X login page ...")
+    page.goto("https://x.com/i/flow/login", wait_until="domcontentloaded", timeout=30000)
+
+    # Step 1: Enter username/email
+    print("Entering username ...")
+    username_input = page.wait_for_selector('input[autocomplete="username"]', timeout=15000)
+    username_input.fill(username)
+    page.keyboard.press("Enter")
+
+    # Step 2: X might ask for email verification or go straight to password
+    print("Waiting for next step ...")
+    try:
+        # Check if X asks for email/phone verification
+        verify_input = page.wait_for_selector(
+            'input[data-testid="ocfEnterTextTextInput"]', timeout=5000
         )
-        page = context.new_page()
+        if verify_input:
+            print("Email/phone verification requested, entering email ...")
+            verify_input.fill(email)
+            page.keyboard.press("Enter")
+    except Exception:
+        # No verification step — go straight to password
+        pass
 
-        print(f"Navigating to {PROFILE_URL} ...")
-        try:
-            # Use domcontentloaded — networkidle never fires on X.com
-            page.goto(PROFILE_URL, wait_until="domcontentloaded", timeout=30000)
-        except Exception as e:
-            print(f"Navigation error: {e}")
-            page.screenshot(path="debug_screenshot.png")
-            print("Saved debug_screenshot.png")
-            browser.close()
-            return None, None
+    # Step 3: Enter password
+    print("Entering password ...")
+    password_input = page.wait_for_selector(
+        'input[name="password"], input[type="password"]', timeout=10000
+    )
+    password_input.fill(password)
+    page.keyboard.press("Enter")
 
-        # Wait for tweet articles to appear (X loads them via JS)
-        print("Waiting for tweets to load ...")
-        try:
-            page.wait_for_selector('article[data-testid="tweet"]', timeout=30000)
-        except Exception:
-            # Take a screenshot so we can debug what the page looks like
-            page.screenshot(path="debug_screenshot.png")
-            print("Tweets did not load. Saved debug_screenshot.png for inspection.")
-            print(f"Page title: {page.title()}")
-            browser.close()
-            return None, None
+    # Wait for login to complete — look for the home timeline or profile elements
+    print("Waiting for login to complete ...")
+    try:
+        page.wait_for_selector(
+            '[data-testid="primaryColumn"], [data-testid="AppTabBar_Home_Link"]',
+            timeout=20000,
+        )
+        print("Login successful!")
+    except Exception:
+        page.screenshot(path="debug_screenshot.png")
+        print("Login may have failed. Saved debug_screenshot.png")
+        raise
 
-        # Get all tweet articles
-        articles = page.query_selector_all('article[data-testid="tweet"]')
 
-        if not articles:
-            print("No tweet articles found on the page.")
-            browser.close()
-            return None, None
+def fetch_latest_tweet(page):
+    """Navigate to the profile and scrape the latest tweet."""
+    print(f"Navigating to {PROFILE_URL} ...")
+    page.goto(PROFILE_URL, wait_until="domcontentloaded", timeout=30000)
 
-        # Extract text and link from the first (latest) tweet
-        first_article = articles[0]
+    # Wait for tweet articles to appear
+    print("Waiting for tweets to load ...")
+    try:
+        page.wait_for_selector('article[data-testid="tweet"]', timeout=20000)
+    except Exception:
+        page.screenshot(path="debug_screenshot.png")
+        print("Tweets did not load. Saved debug_screenshot.png")
+        print(f"Page title: {page.title()}")
+        return None, None
 
-        # Get tweet text — it's inside a div with data-testid="tweetText"
-        text_el = first_article.query_selector('[data-testid="tweetText"]')
-        tweet_text = text_el.inner_text().strip() if text_el else ""
+    # Get all tweet articles
+    articles = page.query_selector_all('article[data-testid="tweet"]')
 
-        # Get the tweet link — look for the timestamp link which contains /status/
-        tweet_link = ""
-        time_link = first_article.query_selector('a[href*="/status/"] time')
-        if time_link:
-            href = time_link.evaluate(
-                'el => el.parentElement.getAttribute("href")'
-            )
-            if href:
-                tweet_link = f"https://x.com{href}"
+    if not articles:
+        print("No tweet articles found on the page.")
+        return None, None
 
-        browser.close()
-        return tweet_text, tweet_link
+    first_article = articles[0]
+
+    # Get tweet text
+    text_el = first_article.query_selector('[data-testid="tweetText"]')
+    tweet_text = text_el.inner_text().strip() if text_el else ""
+
+    # Get the tweet link
+    tweet_link = ""
+    time_link = first_article.query_selector('a[href*="/status/"] time')
+    if time_link:
+        href = time_link.evaluate('el => el.parentElement.getAttribute("href")')
+        if href:
+            tweet_link = f"https://x.com{href}"
+
+    return tweet_text, tweet_link
 
 
 def update_readme(tweet_text, tweet_link):
@@ -112,7 +134,34 @@ def update_readme(tweet_text, tweet_link):
 
 
 def main():
-    tweet_text, tweet_link = fetch_latest_tweet()
+    username = os.environ.get("X_USERNAME")
+    email = os.environ.get("X_EMAIL")
+    password = os.environ.get("X_PASSWORD")
+
+    if not all([username, email, password]):
+        print("Error: Missing X credentials in environment variables.")
+        sys.exit(1)
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            user_agent=(
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+            ),
+            viewport={"width": 1280, "height": 900},
+            locale="en-US",
+        )
+        page = context.new_page()
+
+        try:
+            login_to_x(page, username, email, password)
+            tweet_text, tweet_link = fetch_latest_tweet(page)
+        except Exception as e:
+            print(f"Error: {e}")
+            tweet_text, tweet_link = None, None
+        finally:
+            browser.close()
 
     if not tweet_text:
         print("Could not fetch latest tweet. Exiting gracefully.")

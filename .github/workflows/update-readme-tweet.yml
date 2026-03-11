@@ -29,6 +29,10 @@ jobs:
           playwright install chromium --with-deps
           
       - name: Run Scraper Script
+        env:
+          X_USERNAME: ${{ secrets.X_USERNAME }}
+          X_EMAIL: ${{ secrets.X_EMAIL }}
+          X_PASSWORD: ${{ secrets.X_PASSWORD }}
         run: python scripts/update_tweet.py
 
       - name: Upload debug screenshot (if scraping failed)
