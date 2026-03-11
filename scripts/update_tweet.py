@@ -14,13 +14,17 @@ def login_to_x(page, username, email, password):
 
     # Step 1: Enter username/email
     print("Entering username ...")
-    # Wait for the input field to be ready and fill it
+    # Wait for the input field to be ready
     username_locator = page.locator('input[autocomplete="username"]')
     username_locator.wait_for(state="visible", timeout=15000)
-    username_locator.fill(username)
     
-    # Wait a moment for any React state updates, then explicitly click Next
-    # Using 'button' exact role is much safer than general text search
+    # X.com's React form actively clears instantaneously filled inputs 
+    # Click then type slowly to simulate human interaction
+    username_locator.click()
+    page.keyboard.type(username, delay=50)
+    
+    # Wait a moment for React state updates, then explicitly click Next
+    page.wait_for_timeout(1000)
     next_btn = page.locator('button:has-text("Next")')
     next_btn.wait_for(state="visible", timeout=5000)
     next_btn.click(force=True)
@@ -32,8 +36,11 @@ def login_to_x(page, username, email, password):
         verify_locator = page.locator('input[data-testid="ocfEnterTextTextInput"]')
         verify_locator.wait_for(state="visible", timeout=5000)
         print("Email/phone verification requested, entering email ...")
-        verify_locator.fill(email)
         
+        verify_locator.click()
+        page.keyboard.type(email, delay=50)
+        
+        page.wait_for_timeout(1000)
         verify_next = page.locator('button:has-text("Next")')
         verify_next.wait_for(state="visible", timeout=5000)
         verify_next.click(force=True)
@@ -47,8 +54,11 @@ def login_to_x(page, username, email, password):
     try:
         password_locator = page.locator('input[name="password"], input[type="password"]')
         password_locator.wait_for(state="visible", timeout=15000)
-        password_locator.fill(password)
         
+        password_locator.click()
+        page.keyboard.type(password, delay=50)
+        
+        page.wait_for_timeout(1000)
         login_btn = page.locator('button:has-text("Log in")')
         login_btn.wait_for(state="visible", timeout=5000)
         login_btn.click(force=True)
