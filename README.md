@@ -14,10 +14,10 @@ I am Vedant Singh Chauhan, a passionate problem-solver who thrives on creating i
 I share insights, resources, and updates about my projects, learning journey, and more. Check out my latest posts over on X!
 
 <a target="_blank" href="https://x.com/xgeekyved">
-  <!-- TWEET_START -->
+  TWEET_START
   <img src="https://pbs.twimg.com/profile_banners/755314051052212224/1676646738/1500x500" alt="Latest Tweet" width="100%" />
   <!-- TWEET_END -->
-</a> -->
+<!-- </a> --> 
 
 <!-- ### Writing & Publications
 When I'm not writing code, I'm usually writing about it! I regularly publish deep dives into tech, engineering challenges, and my personal thoughts on the future of AI and quantum computing. 
