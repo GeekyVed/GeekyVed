@@ -16,20 +16,28 @@ def login_to_x(page, username, email, password):
     print("Entering username ...")
     username_input = page.wait_for_selector('input[autocomplete="username"]', timeout=15000)
     username_input.fill(username)
-    page.keyboard.press("Enter")
+    # X's React form often ignores the Enter key, explicitly click Next
+    next_btn = page.locator('button:has-text("Next")')
+    if next_btn.count() > 0:
+        next_btn.first.click()
+    else:
+        page.keyboard.press("Enter")
 
     # Step 2: X might ask for email verification or go straight to password
     print("Waiting for next step ...")
     try:
         # Check if X asks for email/phone verification (suspicious login check)
-        # The selector is usually a text input that asks for email/phone
         verify_input = page.wait_for_selector(
             'input[data-testid="ocfEnterTextTextInput"]', timeout=5000
         )
         if verify_input:
             print("Email/phone verification requested, entering email ...")
             verify_input.fill(email)
-            page.keyboard.press("Enter")
+            verify_next = page.locator('button:has-text("Next")')
+            if verify_next.count() > 0:
+                verify_next.first.click()
+            else:
+                page.keyboard.press("Enter")
     except Exception:
         # No verification step — go straight to password
         print("No email verification requested.")
@@ -42,7 +50,11 @@ def login_to_x(page, username, email, password):
             'input[name="password"], input[type="password"]', timeout=15000
         )
         password_input.fill(password)
-        page.keyboard.press("Enter")
+        login_btn = page.locator('button:has-text("Log in")')
+        if login_btn.count() > 0:
+            login_btn.first.click()
+        else:
+            page.keyboard.press("Enter")
     except Exception as e:
         page.screenshot(path="debug_screenshot.png")
         print(f"Failed to find password field. Saved debug_screenshot.png. Error: {e}")
