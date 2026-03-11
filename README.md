@@ -29,11 +29,11 @@ Grab a coffee and check out my latest article<br>
 <br> -->
 
 
-### GitHub Stats
+<!-- ### GitHub Stats
 <div align="center">
   <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=geekyved&layout=compact&theme=dracula" alt="Top Languages" />
 </div>
-<br/>
+<br/> -->
 
 ### Connect with me!
 <div style="display: flex; gap: 15px; align-items: center;">
